@@ -8,24 +8,24 @@
  */
 int _printf(const char *format, ...)
 {
-	int printed_chars = 0; // count of characters printed
-	va_list args; // va_list for variadic arguments
-	char ch; // to store each character in format string
-
+	int printed_chars = 0;
+	va_list args;
+	char ch;
+	
 	/* Start variadic arguments */
 	va_start(args, format);
 
 	/* Loop through the format string */
 	for (int i = 0; format && format[i]; i++)
 	{
-		if (format[i] != '%') // if not a conversion specifier
+		if (format[i] != '%')
 		{
-			putchar(format[i]); // print the character
-			printed_chars++; // increment printed character count
-			continue; // move to next iteration
+			putchar(format[i]);
+			printed_chars++;
+			continue;
 		}
 
-		i++; // move past '%'
+		i++;
 
 		/* Handle conversion specifier */
 		ch = format[i];
