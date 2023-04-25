@@ -6,70 +6,64 @@
  * @format: A format string
  * Return: The number of characters printed
  */
+#include <stdio.h>
+#include <stdarg.h>
+
 int _printf(const char *format, ...)
 {
-	int printed_chars = 0;
-	va_list args;
-	char ch;
-	
-	/* Start variadic arguments */
-	va_start(args, format);
+    int printed_chars = 0;
+    va_list args;
+    char ch;
 
-	/* Loop through the format string */
-	for (int i = 0; format && format[i]; i++)
-	{
-		if (format[i] != '%')
-		{
-			putchar(format[i]);
-			printed_chars++;
-			continue;
-		}
+    va_start(args, format);
 
-		i++;
+    for (int i = 0; format && format[i]; i++)
+    {
+        if (format[i] != '%')
+        {
+            putchar(format[i]);
+            printed_chars++;
+            continue;
+        }
 
-		/* Handle conversion specifier */
-		ch = format[i];
-		switch (ch)
-		{
-			case 'c':
-				/* Retrieve the next argument and print as a character */
-				putchar(va_arg(args, int));
-				printed_chars++;
-				break;
+        i++;
 
-			case 's':
-				/* Retrieve the next argument and print as a string */
-				{
-					char *str = va_arg(args, char *);
-					if (!str) // if argument is NULL, print "(null)"
-						str = "(null)";
-					while (*str)
-					{
-						putchar(*str);
-						printed_chars++;
-						str++;
-					}
-				}
-				break;
+        ch = format[i];
+        switch (ch)
+        {
+            case 'c':
+                putchar(va_arg(args, int));
+                printed_chars++;
+                break;
 
-			case '%':
-				/* Print a literal '%' character */
-				putchar('%');
-				printed_chars++;
-				break;
+            case 's':
+                {
+                    char *str = va_arg(args, char *);
+                    if (!str)
+                        str = "(null)";
+                    while (*str)
+                    {
+                        putchar(*str);
+                        printed_chars++;
+                        str++;
+                    }
+                }
+                break;
 
-			default:
-				/* Print unsupported conversion specifiers as is */
-				putchar('%');
-				putchar(ch);
-				printed_chars += 2;
-				break;
-		}
-	}
+            case '%':
+                putchar('%');
+                printed_chars++;
+                break;
 
-	/* Clean up variadic arguments */
-	va_end(args);
+            default:
+                putchar('%');
+                putchar(ch);
+                printed_chars += 2;
+                break;
+        }
+    }
 
-	return printed_chars;
+    va_end(args);
+
+    return printed_chars;
 }
-
