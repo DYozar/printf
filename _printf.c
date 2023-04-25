@@ -1,66 +1,75 @@
-#include "main.h"
-
-void print_buffer(char buffer[], int *buff_ind);
+#include <stdio.h>
+#include <stdarg.h> // for variadic arguments
 
 /**
- * _printf - Printf function
- * @format: format.
- * Return: Printed chars.
+ * _printf - Custom implementation of printf function
+ * @format: A format string
+ * Return: The number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	int i, printed = 0, printed_chars = 0;
-	int flags, width, precision, size, buff_ind = 0;
-	va_list list;
-	char buffer[BUFF_SIZE];
+	int printed_chars = 0; // count of characters printed
+	va_list args; // va_list for variadic arguments
+	char ch; // to store each character in format string
 
-	if (format == NULL)
-		return (-1);
+	/* Start variadic arguments */
+	va_start(args, format);
 
-	va_start(list, format);
-
-	for (i = 0; format && format[i] != '\0'; i++)
+	/* Loop through the format string */
+	for (int i = 0; format && format[i]; i++)
 	{
-		if (format[i] != '%')
+		if (format[i] != '%') // if not a conversion specifier
 		{
-			buffer[buff_ind++] = format[i];
-			if (buff_ind == BUFF_SIZE)
-				print_buffer(buffer, &buff_ind);
-			/* write(1, &format[i], 1);*/
-			printed_chars++;
+			putchar(format[i]); // print the character
+			printed_chars++; // increment printed character count
+			continue; // move to next iteration
 		}
-		else
+
+		i++; // move past '%'
+
+		/* Handle conversion specifier */
+		ch = format[i];
+		switch (ch)
 		{
-			print_buffer(buffer, &buff_ind);
-			flags = get_flags(format, &i);
-			width = get_width(format, &i, list);
-			precision = get_precision(format, &i, list);
-			size = get_size(format, &i);
-			++i;
-			printed = handle_print(format, &i, list, buffer,
-				flags, width, precision, size);
-			if (printed == -1)
-				return (-1);
-			printed_chars += printed;
+			case 'c':
+				/* Retrieve the next argument and print as a character */
+				putchar(va_arg(args, int));
+				printed_chars++;
+				break;
+
+			case 's':
+				/* Retrieve the next argument and print as a string */
+				{
+					char *str = va_arg(args, char *);
+					if (!str) // if argument is NULL, print "(null)"
+						str = "(null)";
+					while (*str)
+					{
+						putchar(*str);
+						printed_chars++;
+						str++;
+					}
+				}
+				break;
+
+			case '%':
+				/* Print a literal '%' character */
+				putchar('%');
+				printed_chars++;
+				break;
+
+			default:
+				/* Print unsupported conversion specifiers as is */
+				putchar('%');
+				putchar(ch);
+				printed_chars += 2;
+				break;
 		}
 	}
 
-	print_buffer(buffer, &buff_ind);
+	/* Clean up variadic arguments */
+	va_end(args);
 
-	va_end(list);
-
-	return (printed_chars);
+	return printed_chars;
 }
 
-/**
- * print_buffer - Prints the contents of the buffer if it exist
- * @buffer: Array of chars
- * @buff_ind: Index at which to add next char, represents the length.
- */
-void print_buffer(char buffer[], int *buff_ind)
-{
-	if (*buff_ind > 0)
-		write(1, &buffer[0], *buff_ind);
-
-	*buff_ind = 0;
-}
