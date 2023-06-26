@@ -1,77 +1,69 @@
-#include "main.h"
+#include <stdio.h>
+#include <stdarg.h>
 
-/**
- * _printf - Printf function
- * @format: format.
- * Return: Printed chars.
- */
 int _printf(const char *format, ...)
 {
-va_list args;
-int printed_chars = 0;
-int buff_ind = 0;
-char buffer[BUFF_SIZE];
+    va_list args;
+    int count = 0;
 
-va_start(args, format);
+    va_start(args, format);
 
-while (format && *format)
-{
-if (*format != '%')
-{
-buffer[buff_ind++] = *format;
-if (buff_ind == BUFF_SIZE)
-{
-print_buffer(buffer, &buff_ind);
-}
-else
-{
-write(1, format, 1);
-printed_chars++;
-}
-}
-else
-{
-print_buffer(buffer, &buff_ind);
-format++;
-if (*format == '\0')
-break;
-else
-{
-int flags = get_flags(format, &format);
-int width = get_width(format, &format, args);
-int precision = get_precision(format, &format, args);
-int size = get_size(format, &format);
-int printed = handle_print(format, &format, args, buffer,
-   flags, width, precision, size);
-if (printed == -1)
-{
-va_end(args);
-return -1;
-}
-printed_chars += printed;
-}
-}
-format++;
-}
+    while (*format)
+    {
+        if (*format == '%')
+        {
+            format++;
 
-print_buffer(buffer, &buff_ind);
+            // Handle the conversion specifier
+            switch (*format)
+            {
+                case 'c':
+                {
+                    // Fetch the character argument
+                    int c = va_arg(args, int);
+                    // Print the character
+                    putchar(c);
+                    count++;
+                    break;
+                }
+                case 's':
+                {
+                    // Fetch the string argument
+                    const char *str = va_arg(args, const char *);
+                    // Print the string
+                    while (*str)
+                    {
+                        putchar(*str);
+                        str++;
+                        count++;
+                    }
+                    break;
+                }
+                case '%':
+                {
+                    // Print a literal %
+                    putchar('%');
+                    count++;
+                    break;
+                }
+                default:
+                    // For any other character, just print it as is
+                    putchar(*format);
+                    count++;
+                    break;
+            }
+        }
+        else
+        {
+            // Print regular characters
+            putchar(*format);
+            count++;
+        }
 
-va_end(args);
+        format++;
+    }
 
-return printed_chars;
+    va_end(args);
+
+    return count;
 }
-
-/**
- * print_buffer - Prints the contents of the buffer if it exists
- * @buffer: Array of chars
- * @buff_ind: Index at which to add the next char, represents the length.
- */
-void print_buffer(char buffer[], int *buff_ind)
-{
-if (*buff_ind > 0)
-{
-write(1, buffer, *buff_ind);
-*buff_ind = 0;
-}
-}
-
